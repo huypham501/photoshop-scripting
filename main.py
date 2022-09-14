@@ -65,21 +65,32 @@ class PhotoshopDocument:
 
 def traveler_convert_to_PNG(ps_app: win32com.client.CDispatch, start_dir: str, from_format: str,
                             include_all_sub_folder: bool):
+    print("Start session:" + start_dir)
     if not is_exists_path(start_dir):
         # Raise error
         return
 
+    ps_app.Purge(4)
+
     for root, dirs, file_names in os.walk(start_dir):
+        print("Processing in " + start_dir)
         if len(file_names) == 0:
             return
-        for file_name in file_names:
+        for index, file_name in enumerate(file_names):
+            print(str(index + 1) + "/" + str(len(file_names)))
             if file_name.endswith(from_format):
+                print("Convert")
                 doc = PhotoshopDocument(ps_app, root + '\\' + file_name)
                 doc.open()
                 doc.save_as_PNG(root + '\\' + file_name, 5, True, True, 2)
                 doc.close(2)
+                ps_app.Purge(4)
+                continue
+            print("Skip")
         if not include_all_sub_folder:
             break
+    print("Complete session")
+    print("--------------------------------------------------------------")
 
 if __name__ == '__main__':
     ps_app = win32com.client.Dispatch("Photoshop.Application")
